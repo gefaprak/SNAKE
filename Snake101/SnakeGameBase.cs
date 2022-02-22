@@ -10,6 +10,9 @@ public abstract class SnakeGameBase
   private readonly Screen screen;
   private readonly Random random = new();
 
+  public int HighScore { get; set; }
+  public abstract string Level { get; }
+
   public readonly Timer GameUpdateTimer = new()
   {
     Interval = 100

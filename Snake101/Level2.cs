@@ -7,7 +7,7 @@ using System.Diagnostics;
 
 namespace Snake101;
 
-public class SnakeGame : SnakeGameBase
+public class Level2 : SnakeGameBase
 {
   private int score = 0;
   private bool moveUp = false;
@@ -20,8 +20,10 @@ public class SnakeGame : SnakeGameBase
   private bool enter;
   private List<Point2D> hindernisse;
 
+  public override string Level { get; } = "Level 2";
 
-  public SnakeGame(Screen screen)
+
+  public Level2(Screen screen)
     : base(screen)
   {
   }
@@ -48,57 +50,33 @@ public class SnakeGame : SnakeGameBase
   private void ErzeugeItem()
   {
     item = new Point2D(GetRandomNumber(1, 30), GetRandomNumber(1, 30));
-    while(hindernisse.Contains(item))
+    while (hindernisse.Contains(item))
     {
       item = new Point2D(GetRandomNumber(1, 30), GetRandomNumber(1, 30));
     }
-    
   }
-
-
 
   protected override void Update()
   {
-
-
-
-
     // überprüfen ob das spiel beendet ist
-    death();
+    ÜberprüfeKollision();
     // wenn das spiel noch läuft
     // dann bewege die schlange
-    if (ende == false)
+    if (!ende)
     {
       this.BewegeSchlange();
     }
 
-
-    this.restset();
+    this.ÜberprüfeNeustart();
 
     this.MaleHindernisse();
     this.MaleWände();
     this.MaleItem();
     this.MaleSchlange();
 
-    if(ende == false)
-    this.WriteMessage("SCORE:" + score);
-    //first item spowned
-
-    // wird in einer endlosschleife im abstand von 100 millisekunden aufgerufen.
-    // hier muss das spiel neu gezeichnet werden
-    // und der spielstand verändert werden
-
-    // Zeichne Wände
-    // Zeichne Schlange
-    // Zeichne Happen
-
-    // Aktualisiere Schlangenposition
-    // Überprüfe ob Schlange mit Wand kollidiert
-    // Überprüfe ob Schlange mit sich selbst kollidiert
+    if (!ende)
+      this.WriteMessage("SCORE:" + score);
   }
-
-
-
 
   private void MaleSchlange()
   {
@@ -107,7 +85,6 @@ public class SnakeGame : SnakeGameBase
       this.SetPixel(this.schlange[i].X, this.schlange[i].Y);
     }
   }
-
 
   private void MaleItem()
   {
@@ -141,26 +118,26 @@ public class SnakeGame : SnakeGameBase
     hindernisse = new List<Point2D>();
     for (int i = 13; i <= 19; i = i + 1)
     {
-      this.hindernisse.Add(new Point2D( 16, i));
+      this.hindernisse.Add(new Point2D(16, i));
 
     }
+
     for (int i = 13; i <= 19; i = i + 1)
     {
-      this.hindernisse.Add(new Point2D( i, 16));
+      this.hindernisse.Add(new Point2D(i, 16));
     }
-
 
     //diagonalen
 
     for (int i = 4; i <= 9; i = i + 1)
     {
       this.SetPixel(x: i, y: i);
-      this.hindernisse.Add(new Point2D( i, i));
+      this.hindernisse.Add(new Point2D(i, i));
     }
 
     for (int i = 27; i >= 22; i = i - 1)
     {
-      this.hindernisse.Add(new Point2D( i, i));
+      this.hindernisse.Add(new Point2D(i, i));
     }
 
     for (int i = 27; i >= 22; i = i - 1)
@@ -171,7 +148,7 @@ public class SnakeGame : SnakeGameBase
 
     for (int i = 27; i >= 22; i = i - 1)
     {
-      this.hindernisse.Add(new Point2D( i, 31 - i));
+      this.hindernisse.Add(new Point2D(i, 31 - i));
     }
 
   }
@@ -180,71 +157,60 @@ public class SnakeGame : SnakeGameBase
   {
     foreach (var hindernis in hindernisse)
       this.SetPixel(hindernis);
-
   }
-  void death()
+
+  void ÜberprüfeKollision()
   {
     var kopf = this.schlange.First();
     if (kopf.X >= 0 && kopf.X <= 31 && kopf.Y == 0)
     {
-      ende = true;
-      this.WriteMessage("YOU ARE DEAD!!! if you want to play again Press RETURN");
-      score = 0;
-      GameUpdateTimer.Interval = 100;
+      this.Zurücksetzen();
     }
     else if (kopf.Y >= 0 && kopf.Y <= 31 && kopf.X == 0)
     {
-      ende = true;
-      this.WriteMessage("YOU ARE DEAD!!! if you want to play again Press RETURN");
-      score = 0;
-      GameUpdateTimer.Interval = 100;
+      this.Zurücksetzen();
     }
     else if (kopf.X >= 0 && kopf.X <= 31 && kopf.Y == 31)
     {
-      ende = true;
-      this.WriteMessage("YOU ARE DEAD!!! if you want to play again Press RETURN");
-      score = 0;
-      GameUpdateTimer.Interval = 100;
+      this.Zurücksetzen();
     }
     else if (kopf.Y >= 0 && kopf.Y <= 31 && kopf.X == 31)
     {
-      ende = true;
-      this.WriteMessage("YOU ARE DEAD!!! if you want to play again Press RETURN");
-      score = 0;
-      GameUpdateTimer.Interval = 100;
+      this.Zurücksetzen();
     }
     else
     {
-
       foreach (var hindernis in hindernisse)
       {
-        if(hindernis == kopf)
+        if (hindernis == kopf)
         {
-          ende = true;
-          this.WriteMessage("YOU ARE DEAD!!! if you want to play again Press RETURN");
-          score = 0;
+          this.Zurücksetzen();
           return;
         }
       }
-        for (int i = 1; i < schlange.Count; i++)
+      for (int i = 1; i < schlange.Count; i++)
       {
         if (schlange.First() == schlange[i])
         {
-          ende = true;
-          this.WriteMessage("YOU ARE DEAD!!! if you want to play again Press RETURN");
-          score = 0;
+          this.Zurücksetzen();
           return;
         }
       }
 
       ende = false;
-
     }
+  }
+
+  private void Zurücksetzen()
+  {
+    ende = true;
+    this.WriteMessage("YOU ARE DEAD!!! if you want to play again Press RETURN");
+    score = 0;
+    GameUpdateTimer.Interval = 100;
   }
 
   private void BewegeSchlange()
   {
-
     var schwanz = this.schlange.Last();
     var kopf = this.schlange.First();
     Point2D neuerKopf = new Point2D(0, 0);
@@ -252,62 +218,54 @@ public class SnakeGame : SnakeGameBase
     if (moveUp)
     {
       neuerKopf = new Point2D(kopf.X, kopf.Y - 1);
-
-      if (kopf == item)
-      {
-        schlange.Add(schwanz);
-        item = new Point2D(GetRandomNumber(1, 30), GetRandomNumber(1, 30));
-        score += 1;
-
-        if(GameUpdateTimer.Interval <= 10)
-        {
-          GameUpdateTimer.Interval -= 5;
-        }
-
-      }
+      ÜberprüfeSchlangeItemKollision(schwanz, kopf);
     }
     else if (moveRight)
     {
       neuerKopf = new Point2D(kopf.X + 1, kopf.Y);
 
-      if (kopf == item)
-      {
-        schlange.Add(schwanz);
-        item = new Point2D(GetRandomNumber(1, 30), GetRandomNumber(1, 30));
-        score += 1;
-      }
+      ÜberprüfeSchlangeItemKollision(schwanz, kopf);
     }
     else if (moveDown)
     {
       neuerKopf = new Point2D(kopf.X, kopf.Y + 1);
 
-      if (kopf == item)
-      {
-        schlange.Add(schwanz);
-        item = new Point2D(GetRandomNumber(1, 30), GetRandomNumber(1, 30));
-        score += 1;
-
-      }
+      ÜberprüfeSchlangeItemKollision(schwanz, kopf);
     }
     else if (moveLeft)
     {
       neuerKopf = new Point2D(kopf.X - 1, kopf.Y);
 
-      if (kopf == item)
-      {
-        schlange.Add(schwanz);
-        item = new Point2D(GetRandomNumber(1, 30), GetRandomNumber(1, 30));
-        score += 1;
-      }
+      ÜberprüfeSchlangeItemKollision(schwanz, kopf);
     }
+
     // Insert = Einfügen
     // Add Hinzufügen an letzter stelle
     this.schlange.Insert(0, neuerKopf);
     this.schlange.Remove(schwanz);
   }
+
+  private void ÜberprüfeSchlangeItemKollision(Point2D schwanz, Point2D kopf)
+  {
+    if (kopf == item)
+    {
+      schlange.Add(schwanz);
+      item = new Point2D(GetRandomNumber(1, 30), GetRandomNumber(1, 30));
+      score += 1;
+
+      if (score > this.HighScore)
+        this.HighScore = score;
+
+      if (GameUpdateTimer.Interval <= 10)
+      {
+        GameUpdateTimer.Interval -= 5;
+      }
+    }
+  }
+
   protected override void OnArrowDown()
   {
-    if(moveUp == true)
+    if (moveUp == true)
     {
       return;
     }
@@ -329,10 +287,10 @@ public class SnakeGame : SnakeGameBase
     }
     else
     {
-    moveDown = false;
-    moveLeft = false;
-    moveRight = false;
-    moveUp = true;
+      moveDown = false;
+      moveLeft = false;
+      moveRight = false;
+      moveUp = true;
     }
 
     // wird aufgerufen, wenn die Pfeiltaste nach oben gedrückt wurde
@@ -346,10 +304,10 @@ public class SnakeGame : SnakeGameBase
     }
     else
     {
-    moveDown = false;
-    moveLeft = true;
-    moveRight = false;
-    moveUp = false;
+      moveDown = false;
+      moveLeft = true;
+      moveRight = false;
+      moveUp = false;
     }
 
     // wird aufgerufen, wenn die Pfeiltaste nach links gedrückt wurde
@@ -363,10 +321,10 @@ public class SnakeGame : SnakeGameBase
     }
     else
     {
-    moveDown = false;
-    moveLeft = false;
-    moveRight = true;
-    moveUp = false;
+      moveDown = false;
+      moveLeft = false;
+      moveRight = true;
+      moveUp = false;
     }
 
     // wird aufgerufen, wenn die Pfeiltaste nach rechts gedrückt wurde
@@ -377,9 +335,9 @@ public class SnakeGame : SnakeGameBase
     // wird aufgerufen, wenn die ENTER Taste gedrückt wurde
     enter = true;
   }
-  private void restset()
+  private void ÜberprüfeNeustart()
   {
-    if(enter == true && ende == true)
+    if (enter == true && ende == true)
     {
       //alte schlange verschwinden lassen
       //neue schlange erscheinen lassen 
