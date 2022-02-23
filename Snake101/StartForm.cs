@@ -22,6 +22,9 @@ namespace Snake101
 
     private void btnLevel1_Click(object sender, EventArgs e)
     {
+      if (!this.HasPlayername())
+        return;
+
       var screen = new Screen();
 
       var game = new Level1(screen);
@@ -33,6 +36,9 @@ namespace Snake101
 
     private void btnLevel2_Click(object sender, EventArgs e)
     {
+      if (!this.HasPlayername())
+        return;
+
       var screen = new Screen();
 
       var game = new Level2(screen);
@@ -58,6 +64,36 @@ namespace Snake101
 
         this.lsvHighscores.Items.Add(item);
       }
+    }
+
+    private bool HasPlayername()
+    {
+      if (string.IsNullOrWhiteSpace(this.txtPlayername.Text))
+      {
+        MessageBox.Show("Bitte Spielername eingeben", "SNAKE", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        return false;
+      }
+
+      return true;
+    }
+
+    private void btnLevel3_Click(object sender, EventArgs e)
+    {
+      if (!this.HasPlayername())
+        return;
+
+      var screen = new Screen();
+
+      var game = new Level3(screen);
+
+      screen.ShowDialog();
+      this.highScoreDb.RegisterPlayedGame(game.Level, this.txtPlayername.Text, game.HighScore);
+      this.UpdateHighScoresListView();
+    }
+
+    private void lsvHighscores_SelectedIndexChanged(object sender, EventArgs e)
+    {
+
     }
   }
 }

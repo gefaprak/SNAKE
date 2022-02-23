@@ -7,7 +7,7 @@ using System.Diagnostics;
 
 namespace Snake101;
 
-public class Level1 : SnakeGameBase
+public class Level3 : SnakeGameBase
 {
   private int score = 0;
   private bool moveUp = false;
@@ -18,10 +18,12 @@ public class Level1 : SnakeGameBase
   private List<Point2D> schlange;
   private bool ende;
   private bool enter;
+  private List<Point2D> hindernisse = new();
 
-  public override string Level { get; } = "Level 1";
+  public override string Level { get; } = "Level 3";
 
-  public Level1(Screen screen)
+
+  public Level3(Screen screen)
     : base(screen)
   {
   }
@@ -30,6 +32,7 @@ public class Level1 : SnakeGameBase
   {
     ErzeugeItem();
     ErzeugeSchlange();
+    ErzeugenWand();
   }
 
   private void ErzeugeSchlange()
@@ -47,8 +50,37 @@ public class Level1 : SnakeGameBase
   private void ErzeugeItem()
   {
     item = new Point2D(GetRandomNumber(1, 30), GetRandomNumber(1, 30));
+    ÜberprüfeItemHindernis();
   }
 
+  private void ErzeugenWand()
+  {
+    for (int i = 5; i < 27; i++)
+    {
+      hindernisse.Add(new Point2D(5, i));
+      hindernisse.Add(new Point2D(26, i));
+    }
+    for (int i = 6; i < 26; i++)
+    {
+      hindernisse.Add(new Point2D(i, 26));
+    }
+    for (int i = 5; i < 22; i++)
+    {
+      hindernisse.Add(new Point2D(10, i));
+      hindernisse.Add(new Point2D(21, i));
+    }
+    for (int i = 11; i < 21; i++)
+    {
+      hindernisse.Add(new Point2D(i, 5));
+    }
+  }
+  private void MaleWand()
+  {
+    foreach (var hindernis in hindernisse)
+    {
+      this.SetPixel(hindernis);
+    }
+  }
   protected override void Update()
   {
     // überprüfen ob das spiel beendet ist
@@ -59,9 +91,10 @@ public class Level1 : SnakeGameBase
     {
       this.BewegeSchlange();
     }
+    this.MaleWand();
 
     this.ÜberprüfeNeustart();
-    this.MaleWände();
+
     this.MaleItem();
     this.MaleSchlange();
 
@@ -82,56 +115,29 @@ public class Level1 : SnakeGameBase
     this.SetPixel(item.X, item.Y, Color.Crimson);
   }
 
-  private void MaleWände()
-  {
-    //create walls
 
-    for (int i = 1; i < 32; i = i + 1)
-    {
-      this.SetPixel(x: i, y: 0);
-    }
-    for (int i = 0; i < 31; i = i + 1)
-    {
-      this.SetPixel(x: 0, y: i);
-    }
-    for (int i = 0; i < 31; i = i + 1)
-    {
-      this.SetPixel(x: i, y: 31);
-    }
-    for (int i = 1; i < 32; i = i + 1)
-    {
-      this.SetPixel(x: 31, y: i);
-    }
-  }
+
   void ÜberprüfeKollision()
   {
     var kopf = this.schlange.First();
-    if (kopf.X >= 0 && kopf.X <= 31 && kopf.Y == 0)
+
+
+    foreach (var hindernis in hindernisse)
     {
-      this.Zurücksetzen();
-    }
-    else if (kopf.Y >= 0 && kopf.Y <= 31 && kopf.X == 0)
-    {
-      this.Zurücksetzen();
-    }
-    else if (kopf.X >= 0 && kopf.X <= 31 && kopf.Y == 31)
-    {
-      this.Zurücksetzen();
-    }
-    else if (kopf.Y >= 0 && kopf.Y <= 31 && kopf.X == 31)
-    {
-      this.Zurücksetzen();
-    }
-    else
-    {
-      for (int i = 1; i < schlange.Count; i++)
+      if (hindernis == kopf)
       {
-        if (schlange.First() == schlange[i])
-        {
-          this.Zurücksetzen();
-          return;
-        }
+        this.Zurücksetzen();
+        return;
       }
+    }
+    for (int i = 1; i < schlange.Count; i++)
+    {
+      if (schlange.First() == schlange[i])
+      {
+        this.Zurücksetzen();
+        return;
+      }
+
 
       ende = false;
     }
@@ -153,24 +159,52 @@ public class Level1 : SnakeGameBase
 
     if (moveUp)
     {
-      neuerKopf = new Point2D(kopf.X, kopf.Y - 1);
+      if (kopf.Y == 0)
+      {
+        neuerKopf = new Point2D(kopf.X, 31);
+      }
+      else
+      {
+        neuerKopf = new Point2D(kopf.X, kopf.Y - 1);
+      }
       ÜberprüfeSchlangeItemKollision(schwanz, kopf);
+
     }
     else if (moveRight)
     {
-      neuerKopf = new Point2D(kopf.X + 1, kopf.Y);
-
+      if (kopf.X == 31)
+      {
+        neuerKopf = new Point2D(0, kopf.Y);
+      }
+      else
+      {
+        neuerKopf = new Point2D(kopf.X + 1, kopf.Y);
+      }
       ÜberprüfeSchlangeItemKollision(schwanz, kopf);
+
     }
     else if (moveDown)
     {
-      neuerKopf = new Point2D(kopf.X, kopf.Y + 1);
-
+      if (kopf.Y == 31)
+      {
+        neuerKopf = new Point2D(kopf.X, 0);
+      }
+      else
+      {
+        neuerKopf = new Point2D(kopf.X, kopf.Y + 1);
+      }
       ÜberprüfeSchlangeItemKollision(schwanz, kopf);
     }
     else if (moveLeft)
     {
-      neuerKopf = new Point2D(kopf.X - 1, kopf.Y);
+      if (kopf.X == 0)
+      {
+        neuerKopf = new Point2D(31, kopf.Y);
+      }
+      else
+      {
+        neuerKopf = new Point2D(kopf.X - 1, kopf.Y);
+      }
 
       ÜberprüfeSchlangeItemKollision(schwanz, kopf);
     }
@@ -186,7 +220,9 @@ public class Level1 : SnakeGameBase
     if (kopf == item)
     {
       schlange.Add(schwanz);
-      item = new Point2D(GetRandomNumber(1, 30), GetRandomNumber(1, 30));
+      item = new Point2D(GetRandomNumber(0, 31), GetRandomNumber(0, 31));
+      ÜberprüfeItemHindernis();
+
       score += 1;
 
       if (score > this.HighScore)
@@ -196,6 +232,14 @@ public class Level1 : SnakeGameBase
       {
         GameUpdateTimer.Interval -= 5;
       }
+    }
+  }
+
+  private void ÜberprüfeItemHindernis()
+  {
+    while (hindernisse.Contains(item))
+    {
+      item = new Point2D(GetRandomNumber(1, 30), GetRandomNumber(1, 30));
     }
   }
 

@@ -82,13 +82,13 @@ public class Level2 : SnakeGameBase
   {
     for (int i = 0; i < this.schlange.Count; i++)
     {
-      this.SetPixel(this.schlange[i].X, this.schlange[i].Y);
+      this.SetPixel(this.schlange[i].X, this.schlange[i].Y, Color.Blue);
     }
   }
 
   private void MaleItem()
   {
-    this.SetPixel(item.X, item.Y);
+    this.SetPixel(item.X, item.Y, Color.Crimson);
   }
 
   private void MaleWände()
