@@ -12,9 +12,12 @@ namespace Snake101
 {
   public partial class StartForm : Form
   {
+    private readonly PlayerHighScoreDatabase highScoreDb = new();
+   
     public StartForm()
     {
-      InitializeComponent();
+      this.InitializeComponent();
+      this.UpdateHighScoresListView();
     }
 
     private void btnLevel1_Click(object sender, EventArgs e)
@@ -24,6 +27,8 @@ namespace Snake101
       var game = new Level1(screen);
 
       screen.ShowDialog();
+      this.highScoreDb.RegisterPlayedGame(game.Level, this.txtPlayername.Text, game.HighScore);
+      this.UpdateHighScoresListView();
     }
 
     private void btnLevel2_Click(object sender, EventArgs e)
@@ -33,16 +38,26 @@ namespace Snake101
       var game = new Level2(screen);
 
       screen.ShowDialog();
-    
-   
+
+      this.highScoreDb.RegisterPlayedGame(game.Level, this.txtPlayername.Text, game.HighScore);
+      this.UpdateHighScoresListView();
+    }
+
+
+    private void UpdateHighScoresListView()
+    {
+      this.lsvHighscores.Items.Clear();
+
+      foreach (var highscore in this.highScoreDb.HighScores)
+      {
+        var item = new ListViewItem()
+        {
+          Text = highscore.Player,
+          SubItems = { highscore.Level, highscore.HighScore.ToString() }
+        };
+
+        this.lsvHighscores.Items.Add(item);
+      }
     }
   }
-
-  public class PlayerHighScore
-  {
-    public string Player { get; set; }
-    public int HighScore { get; set; }
-    public string Level { get; set; }
-  }
-
 }

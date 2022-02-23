@@ -8,7 +8,8 @@ public class Screen : Form
   private const int PixelSize = 8;
   private const int PixelBorder = 1;
 
-  private readonly bool[,] pixels = new bool[ResolutionX, ResolutionY];
+
+  private readonly Color?[,] pixels = new Color?[ResolutionX, ResolutionY];
 
   private string message;
 
@@ -34,25 +35,19 @@ public class Screen : Form
   public void ClearPixels()
   {
     for (var x = 0; x < ResolutionX; x++)
-    for (var y = 0; y < ResolutionY; y++)
-      this.pixels[x, y] = false;
+      for (var y = 0; y < ResolutionY; y++)
+        this.pixels[x, y] = null;
   }
 
-  public void SetPixel(int x, int y)
+  public void SetPixel(int x, int y, Color? color)
   {
-    if (x >= ResolutionX)
-      throw new Exception($"X: {x} >= {ResolutionX}");
+    if (x >= ResolutionX || y >= ResolutionY)
+      throw new ArgumentOutOfRangeException();
 
-    if (y >= ResolutionY)
-      throw new Exception($"Y: {y} >= {ResolutionY}");
+    if (x < 0 || y < 0)
+      throw new ArgumentOutOfRangeException();
 
-    if (x < 0)
-      throw new Exception($"X: {x} < 0");
-
-    if (y < 0)
-      throw new Exception($"Y: {y} < 0");
-
-    this.pixels[x, y] = true;
+    this.pixels[x, y] = color ?? Color.Black;
   }
 
   public void WriteMessage(string message)
@@ -73,15 +68,15 @@ public class Screen : Form
     {
       for (var y = 0; y < ResolutionY; y++)
       {
-        if (!this.pixels[x, y])
+        if (this.pixels[x, y] is not Color color)
           continue;
 
         var pixelX = x * PixelSize + PixelBorder;
         var pixelY = y * PixelSize + PixelBorder;
 
         var drawablePixelSize = PixelSize - 2 * PixelBorder;
-
-        e.Graphics.FillRectangle(Brushes.Black, pixelX, pixelY, drawablePixelSize, drawablePixelSize);
+        using var brush = new SolidBrush(color);
+        e.Graphics.FillRectangle(brush, pixelX, pixelY, drawablePixelSize, drawablePixelSize);
       }
     }
 

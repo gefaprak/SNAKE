@@ -1,7 +1,6 @@
 using Timer = System.Windows.Forms.Timer;
 
 namespace Snake101;
-
 /// <summary>
 /// Stellt das Gerüst eines 2D Spiels dar
 /// </summary>
@@ -10,10 +9,9 @@ public abstract class SnakeGameBase
   private readonly Screen screen;
   private readonly Random random = new();
 
-  public int HighScore { get; set; }
   public abstract string Level { get; }
-
-  public readonly Timer GameUpdateTimer = new()
+  public int HighScore { get; set; }
+  protected Timer GameUpdateTimer { get; } = new()
   {
     Interval = 100
   };
@@ -38,7 +36,21 @@ public abstract class SnakeGameBase
 
   private void ScreenKeyUp(object? sender, KeyEventArgs e)
   {
-    switch (e.KeyCode)
+    this.OnKeyDown(e.KeyCode);
+  }
+
+
+  protected void WriteMessage(string message)
+  {
+    this.screen.WriteMessage(message);
+  }
+
+  protected void SetPixel(int x, int y, Color? color = null) => this.screen.SetPixel(x, y, color);
+  protected void SetPixel(Point2D point, Color? color = null) => this.SetPixel(point.X, point.Y, color);
+
+  protected virtual void OnKeyDown(Keys keys)
+  {
+    switch (keys)
     {
       case Keys.Down:
       case Keys.S:
@@ -62,18 +74,18 @@ public abstract class SnakeGameBase
     }
   }
 
-  protected void ShowError(string message)
+  protected virtual void OnEnter()
   {
-    MessageBox.Show(message, "SNAKE101", MessageBoxButtons.OK, MessageBoxIcon.Error);
   }
 
-  protected void WriteMessage(string message)
+  protected virtual void OnArrowRight()
   {
-    this.screen.WriteMessage(message);
   }
 
-  protected void SetPixel(int x, int y) => this.screen.SetPixel(x, y);
-  protected void SetPixel(Point2D point) => this.SetPixel(point.X, point.Y);
+  protected virtual void OnArrowLeft()
+  {
+  }
+
   protected virtual void OnArrowUp()
   {
   }
@@ -82,19 +94,7 @@ public abstract class SnakeGameBase
   {
   }
 
-  protected virtual void OnArrowLeft()
-  {
-  }
-  protected virtual void OnArrowRight()
-  {
-  }
-
-  protected virtual void OnEnter()
-  {
-  }
-
   protected int ResolutionX => Screen.ResolutionX;
-
   protected int ResolutionY => Screen.ResolutionY;
 
   protected int GetRandomNumber(int min, int max)
